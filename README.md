@@ -2,7 +2,7 @@
 
 ## Overview
 
-"This repository contains automated Locust load tests for LiteLLM endpoints, allowing us to detect performance regressions. The currently targeted endpoints are:
+This repository contains automated Locust load tests for LiteLLM endpoints, allowing us to detect performance regressions. The currently targeted endpoints are:
 
 - `chat/completions`
 - `v1/responses`

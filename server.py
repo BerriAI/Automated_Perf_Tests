@@ -2,16 +2,13 @@ import os
 from typing import Optional
 
 from fastapi import FastAPI, Header, HTTPException, status
-from helpers import LoadTestRequest, SUPPORTED_TESTS, get_bearer_token
+from helpers import LoadTestRequest, SUPPORTED_TESTS, TestOverride, get_bearer_token
 
 
 app = FastAPI(title="Locust Load Test Runner", version="1.0.0")
 
 
-@app.post("/run-load-tests")
-async def run_load_tests(
-    request: Optional[LoadTestRequest] = None, authorization: Optional[str] = Header(default=None)
-):
+def _require_valid_bearer_token(authorization: Optional[str]) -> None:
     expected_token = os.environ.get("LOAD_TEST_BEARER_TOKEN")
     if not expected_token:
         raise HTTPException(
@@ -26,6 +23,13 @@ async def run_load_tests(
             detail="Invalid bearer token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@app.post("/run-load-tests")
+async def run_load_tests(
+    request: Optional[LoadTestRequest] = None, authorization: Optional[str] = Header(default=None)
+):
+    _require_valid_bearer_token(authorization)
 
     payload = request or LoadTestRequest()
 
@@ -43,6 +47,35 @@ async def run_load_tests(
             ) from exc
 
     return {"results": results}
+
+
+@app.post("/run-load-tests/{test_name}")
+async def run_single_load_test(
+    test_name: str,
+    request: Optional[TestOverride] = None,
+    authorization: Optional[str] = Header(default=None),
+):
+    _require_valid_bearer_token(authorization)
+
+    test_runner = SUPPORTED_TESTS.get(test_name)
+    if not test_runner:
+        supported_tests = ", ".join(sorted(SUPPORTED_TESTS.keys()))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unsupported load test '{test_name}'. Supported tests: {supported_tests}",
+        )
+
+    try:
+        result = test_runner(request)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to execute {test_name} load test: {exc}",
+        ) from exc
+
+    return {"test": test_name, "result": result}
 
 
 __all__ = ["app"]
