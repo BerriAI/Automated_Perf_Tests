@@ -6,7 +6,7 @@ This repository provides **FastAPI endpoints and Locust scenarios** for automate
 * `v1/responses`
 * `embeddings`
 
-Use these tests to **detect performance regressions or validate scaling improvements**. See `docs/CONFIG.md` for all available overrides and default settings.
+Use these tests to **detect performance regressions or validate performance improvements**. See `docs/CONFIG.md` for all available overrides and default settings.
 
 ## Requirements
 
