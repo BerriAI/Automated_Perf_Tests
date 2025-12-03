@@ -18,19 +18,21 @@ poetry install
 poetry shell  # optional
 ```
 
-## Required Environment
+## Required Environment Variables
 
-Set these variables in the shell before launching the server or scripts:
+**On the server side**, set these environment variables before launching the server:
 
 ```
-export LOCUST_API_KEY=...
-export LOAD_TEST_BEARER_TOKEN=...
+export LOCUST_API_KEY=...               # API key used by Locust to authenticate requests to the target host
+export LOAD_TEST_BEARER_TOKEN=...       # Secret token that the server expects for API authentication
 export LOCUST_HOST=...                  # optional global host override
 # Or set per-test hosts when LOCUST_HOST is not provided:
 export LOCUST_CHAT_HOST=...
 export LOCUST_RESPONSES_HOST=...
 export LOCUST_EMBEDDINGS_HOST=...
 ```
+
+**Note:** `LOAD_TEST_BEARER_TOKEN` is a server-side secret. The server reads it from the environment to validate incoming requests. When making API requests, clients must include this same token value in the `Authorization: Bearer <token>` header.
 
 You can also override the host per request by including a `host` value inside the payload for `chat`, `responses`, or `embeddings`. Request-level overrides take precedence over `LOCUST_HOST` and the scenario-specific environment variables.
 

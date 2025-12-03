@@ -4,6 +4,7 @@ import importlib.util
 import os
 import statistics
 import sys
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Sequence
